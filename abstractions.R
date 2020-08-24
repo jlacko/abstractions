@@ -23,18 +23,18 @@ opt <-  theme(panel.border = element_rect(color="black", fill = NA),
 # Framework environment
 imageW <- 800 # image width (pixels)
 imageH <- 800 # image heigth (pixels)
-decayT <- 0.1 # Trail-map chemoattractant diffusion decay factor
+decayT <- 0.5 # Trail-map chemoattractant diffusion decay factor
 
 # Agent
-FL <-  22.5 * pi / 180 # FL sensor angle from forward position (degrees, 22.5 - 45)
-FR <- -22.5 * pi / 180 # FR sensor angle from forward position (degrees, 22.5 - 45)
-RA <-  45 * pi / 180 # Agent rotation angle (degrees)
-SO <- 6 # Sensor offset distance (pixels)
-SS <- 1 # Step size—how far agent moves per step (pixels) 
-depT <- 15 # Chemoattractant deposition per step
+FL <-  45 * pi / 180 # FL sensor angle from forward position (degrees, 22.5 - 45)
+FR <- -45 * pi / 180 # FR sensor angle from forward position (degrees, 22.5 - 45)
+RA <-  22.5 * pi / 180 # Agent rotation angle (degrees)
+SO <- 25 # Sensor offset distance (pixels)
+SS <- 8 # Step size—how far agent moves per step (pixels) 
+depT <- 80 # Chemoattractant deposition per step
 
-iters <- 2000 # Number if iterations
-agents <- 1000 # Number of agents
+iters <- 7500 # Number if iterations
+agents <- 250 # Number of agents
 
 ######################################################################
 # Initialization of environment layer and particle positions
@@ -45,16 +45,16 @@ envM <- matrix(0 , imageH, imageW)
 # Create a magnetic disc
 for (i in 1:nrow(envM)){
   for (j in 1:ncol(envM)){
-    if(sqrt((i-imageH/2)^2+(j-imageH/2)^2)>imageH/8 &
-       sqrt((i-imageH/2)^2+(j-imageH/2)^2)<imageH/6) envM[i,j]=5
+    if(sqrt((i-imageH/1.5)^2+(j-imageH/3.5)^2)>imageH/8 &
+       sqrt((i-imageH/1.5)^2+(j-imageH/3.5)^2)<imageH/6) envM[i,j]=5
   }
 }
 
 # Place agents in a circle
 tibble(h = seq(from = 0, to = 2*pi, length.out = agents)) %>% 
-  mutate(x = (imageH/20)*cos(h)+imageH/2,
-         y = (imageH/20)*sin(h)+imageH/2,
-         h = jitter(h+pi, amount = 0) ) -> parF
+  mutate(x = (imageH/2)*cos(h)+imageH/2,
+         y = (imageH/2)*sin(h)+imageH/2,
+         h = jitter(h+pi, amount = 50) ) -> parF
 
 
 # Make agents dance
@@ -66,7 +66,8 @@ df <- melt(envM)
 colnames(df) <- c("x","y","v") # to name columns
 
 # Pick a top palette from colourlovers
-palette <- sample(clpalettes('top'), 1)[[1]] 
+#palette <- sample(clpalettes('top'), 1)[[1]] 
+palette <- clpalette(1363540) # Sunburst by aepstein https://www.colourlovers.com/palette/1363540/Sunburst
 colors <- palette %>% swatch %>% .[[1]]
 
 # Do the plot
@@ -81,4 +82,4 @@ ggplot(data = df %>% filter(v>0), aes(x = x, y = y, fill = log(v))) +
 plot
 
 # Do you like it? Save it!
-ggsave("choose_a_name.png", plot, width  = 3, height = 3)
+ggsave(paste0("abstraction-", format(Sys.time(), "%H-%M-%S"), ".png"), plot, width  = 5, height = 5)
